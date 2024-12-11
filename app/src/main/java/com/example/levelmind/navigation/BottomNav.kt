@@ -23,15 +23,16 @@ import androidx.navigation.compose.rememberNavController
 import com.example.levelmind.data.BottomNavParams
 import com.example.levelmind.screens.Downloads
 import com.example.levelmind.screens.Media
+import com.example.levelmind.viewmodals.MediaViewModel
 
 @Composable
-fun BottomNav(navController: NavHostController){
+fun BottomNav(navController: NavHostController,mediaViewModel : MediaViewModel){
     val navHostController = rememberNavController()
 
     Scaffold(bottomBar = { FloatingBottomBar(navHostController) }) { innerPadding ->
         NavHost(navController = navHostController, startDestination = Routes.Media.routes, modifier = Modifier.padding(innerPadding) ){
             composable(Routes.Media.routes){
-                Media()
+                Media(mediaViewModel)
             }
             composable(Routes.Downloads.routes){
                 Downloads()

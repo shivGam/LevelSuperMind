@@ -69,6 +69,8 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.1")
 
     // Room Database
     implementation("androidx.room:room-runtime:2.6.1")
