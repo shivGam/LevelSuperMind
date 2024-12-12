@@ -11,8 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.levelmind.api.RetrofitInstance
+import com.example.levelmind.data.database.DownloadAudioDatabase
+import com.example.levelmind.data.repositories.DownloadRepository
 import com.example.levelmind.navigation.BottomNav
-import com.example.levelmind.repositories.MediaRepository
+import com.example.levelmind.data.repositories.MediaRepository
 import com.example.levelmind.ui.theme.LevelMindTheme
 import com.example.levelmind.viewmodals.MediaViewModel
 import com.example.levelmind.viewmodals.MediaViewModelFactory
@@ -23,7 +25,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val mediaViewModel: MediaViewModel by viewModels{
-            MediaViewModelFactory(MediaRepository(RetrofitInstance.api))
+            MediaViewModelFactory(MediaRepository(RetrofitInstance.api), DownloadRepository(DownloadAudioDatabase.getInstance(this).downloadedDao()))
         }
         setContent {
             LevelMindTheme {

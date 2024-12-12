@@ -5,23 +5,37 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.levelmind.data.AudioModelItem
-import com.example.levelmind.repositories.MediaRepository
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.levelmind.data.database.DownloadedAudioEntity
+import com.example.levelmind.data.models.AudioModelItem
+import com.example.levelmind.data.repositories.DownloadRepository
+import com.example.levelmind.data.repositories.MediaRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.io.File
-import java.net.URL
 
 class MediaViewModel(
-    private val repository: MediaRepository
+    private val repository: MediaRepository,
+    private val downloadRepository: DownloadRepository
 ): ViewModel(){
     private val _audioList = MutableLiveData<List<AudioModelItem>>(emptyList())
     val audioList: LiveData<List<AudioModelItem>> = _audioList
 
+    private val _downloadedAudioList = MutableLiveData<List<DownloadedAudioEntity>>(emptyList())
+    val downloadedAudioList: LiveData<List<DownloadedAudioEntity>> = _downloadedAudioList
+
+    val downloadedAudio: LiveData<List<DownloadedAudioEntity>> = downloadRepository.allDownloadedSongs
     init {
         fetchAudio()
+        fetchDownloaded()
+    }
+
+    private fun fetchDownloaded() {
+        viewModelScope.launch {
+            downloadRepository.allDownloadedSongs.observeForever{
+                _downloadedAudioList.postValue(it)
+                Log.d("MediaViewModel", "Downloaded songs fetched: ${it.size}")
+            }
+        }
     }
 
     private fun fetchAudio() {
@@ -38,6 +52,9 @@ class MediaViewModel(
                 Log.e("MediaViewModel", "Exception: ${e.message}")
             }
         }
+    }
+    suspend fun isAudioDownloaded(audioId: String): Boolean {
+        return downloadRepository.isAudioDownloaded(audioId)
     }
 
 }

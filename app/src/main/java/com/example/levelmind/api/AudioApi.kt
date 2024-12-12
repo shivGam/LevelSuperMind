@@ -1,6 +1,6 @@
 package com.example.levelmind.api
 
-import com.example.levelmind.data.AudioModelItem
+import com.example.levelmind.data.models.AudioModelItem
 import retrofit2.Response
 import retrofit2.http.GET
 

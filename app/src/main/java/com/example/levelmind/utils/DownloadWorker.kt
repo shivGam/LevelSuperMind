@@ -2,12 +2,17 @@ package com.example.levelmind.utils
 
 import android.content.ContentValues
 import android.content.Context
+import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
 import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
+import com.example.levelmind.api.RetrofitInstance
+import com.example.levelmind.data.database.DownloadAudioDatabase
+import com.example.levelmind.data.repositories.DownloadRepository
+import com.example.levelmind.data.repositories.MediaRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -19,6 +24,14 @@ class DownloadWorker(
     context: Context,
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {
+
+    private val downloadRepository: DownloadRepository by lazy {
+        DownloadRepository(DownloadAudioDatabase.getInstance(applicationContext).downloadedDao())
+    }
+
+    private val mediaRepository: MediaRepository by lazy {
+        MediaRepository(RetrofitInstance.api) // Assuming you have a RetrofitClient setup
+    }
 
     override suspend fun doWork(): Result {
         val downloadUrl = inputData.getString("download_url")
@@ -33,6 +46,10 @@ class DownloadWorker(
                         workDataOf("ERROR" to "Invalid download parameters")
                     )
                 }
+
+                // Fetch song details
+                val songResponse = mediaRepository.getSongs()
+                val audioItem = songResponse.body()?.find { it._id == songId }
 
                 // Open connection
                 val url = URL(downloadUrl)
@@ -75,10 +92,15 @@ class DownloadWorker(
                         }
                     }
 
-                    // Mark as downloaded
                     contentValues.clear()
                     contentValues.put(MediaStore.Audio.Media.IS_PENDING, 0)
                     resolver.update(mediaStoreUri, contentValues, null, null)
+
+                    val localFilePath = getLocalFilePath(mediaStoreUri)
+
+                    if (audioItem != null) {
+                        downloadRepository.insertDownloadedSong(audioItem, localFilePath)
+                    }
 
                     Log.d("DownloadWorker", "Download successful: $fileName")
                     Result.success()
@@ -98,5 +120,15 @@ class DownloadWorker(
                 )
             }
         }
+    }
+
+    private fun getLocalFilePath(uri: Uri): String {
+        val projection = arrayOf(MediaStore.Audio.Media.DATA)
+        applicationContext.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            val columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
+            cursor.moveToFirst()
+            return cursor.getString(columnIndex)
+        }
+        throw IllegalStateException("Could not retrieve local file path")
     }
 }

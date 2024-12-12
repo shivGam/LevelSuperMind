@@ -1,4 +1,4 @@
-package com.example.levelmind.data
+package com.example.levelmind.data.models
 
 data class AudioModelItem(
     val _id: String,

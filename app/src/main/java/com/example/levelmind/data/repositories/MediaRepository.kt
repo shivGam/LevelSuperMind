@@ -1,7 +1,7 @@
-package com.example.levelmind.repositories
+package com.example.levelmind.data.repositories
 
 import com.example.levelmind.api.AudioApi
-import com.example.levelmind.data.AudioModelItem
+import com.example.levelmind.data.models.AudioModelItem
 import retrofit2.Response
 
 class MediaRepository(private val audioApi: AudioApi) {

@@ -20,7 +20,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.levelmind.data.BottomNavParams
+import com.example.levelmind.data.models.BottomNavParams
 import com.example.levelmind.screens.Downloads
 import com.example.levelmind.screens.Media
 import com.example.levelmind.viewmodals.MediaViewModel

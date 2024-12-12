@@ -5,7 +5,6 @@ import android.os.Looper
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,14 +17,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import com.example.levelmind.data.AudioModelItem
+import com.example.levelmind.data.models.AudioModelItem
 import com.example.levelmind.viewmodals.MediaViewModel
 
 @Composable
@@ -209,7 +207,7 @@ fun MediaPlayBackOverlay(
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.SkipPrevious,
+                        imageVector = Icons.Default.Replay10,
                         contentDescription = "Rewind 10 seconds",
                         modifier = Modifier.size(36.dp),
                         tint = Color.Black
@@ -250,7 +248,7 @@ fun MediaPlayBackOverlay(
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.SkipNext,
+                        imageVector = Icons.Default.Forward10,
                         contentDescription = "Forward 10 seconds",
                         modifier = Modifier.size(36.dp),
                         tint = Color.Black

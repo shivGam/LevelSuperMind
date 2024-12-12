@@ -1,4 +1,4 @@
-package com.example.levelmind.data
+package com.example.levelmind.data.models
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

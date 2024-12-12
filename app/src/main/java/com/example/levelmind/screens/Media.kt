@@ -24,12 +24,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.DownloadDone
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -48,7 +50,7 @@ import androidx.work.WorkManager
 import androidx.work.workDataOf
 import coil.compose.rememberAsyncImagePainter
 import com.example.levelmind.R
-import com.example.levelmind.data.AudioModelItem
+import com.example.levelmind.data.models.AudioModelItem
 import com.example.levelmind.utils.DownloadWorker
 import com.example.levelmind.viewmodals.MediaViewModel
 import java.io.File
@@ -162,6 +164,12 @@ fun AudioItem(
     backgroundColor: Color,
     onAudioSelected: (AudioModelItem) -> Unit
 ) {
+    var isDownloaded by remember { mutableStateOf(false) }
+
+    // Check if the audio is downloaded when the composable loads
+    LaunchedEffect(audioItem._id) {
+        isDownloaded = mediaViewModel.isAudioDownloaded(audioItem._id)
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -201,26 +209,38 @@ fun AudioItem(
 
         IconButton(
             onClick = {
-                val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
-                    .setInputData(
-                        workDataOf(
-                            "download_url" to audioItem.url,
-                            "song_id" to audioItem._id
+                if (!isDownloaded) {
+                    val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
+                        .setInputData(
+                            workDataOf(
+                                "download_url" to audioItem.url,
+                                "song_id" to audioItem._id
+                            )
                         )
-                    )
-                    .build()
+                        .build()
 
-                WorkManager.getInstance(context).enqueue(downloadRequest)
+                    WorkManager.getInstance(context).enqueue(downloadRequest)
+                }
             },
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.White.copy(alpha = 0.3f))
         ) {
-            Icon(
-                imageVector = Icons.Default.Download,
-                contentDescription = "Download",
-                tint = Color.Black
-            )
+            if (isDownloaded) {
+                // Display checkmark icon if the audio is downloaded
+                Icon(
+                    imageVector = Icons.Default.DownloadDone,
+                    contentDescription = "Downloaded",
+                    tint = Color.Black
+                )
+            } else {
+                // Display download icon if the audio is not downloaded
+                Icon(
+                    imageVector = Icons.Default.Download,
+                    contentDescription = "Download",
+                    tint = Color.Black
+                )
+            }
         }
     }
 }
