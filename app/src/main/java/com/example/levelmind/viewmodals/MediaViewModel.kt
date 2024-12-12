@@ -53,6 +53,10 @@ class MediaViewModel(
             }
         }
     }
+
+    suspend fun deleteDownloadedAudio(audioId: String) {
+        return downloadRepository.deleteDownloadedAudio(audioId)
+    }
     suspend fun isAudioDownloaded(audioId: String): Boolean {
         return downloadRepository.isAudioDownloaded(audioId)
     }

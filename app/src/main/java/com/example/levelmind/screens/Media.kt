@@ -164,12 +164,11 @@ fun AudioItem(
     backgroundColor: Color,
     onAudioSelected: (AudioModelItem) -> Unit
 ) {
-    var isDownloaded by remember { mutableStateOf(false) }
+    val downloadedAudioList by mediaViewModel.downloadedAudioList.observeAsState(emptyList())
 
-    // Check if the audio is downloaded when the composable loads
-    LaunchedEffect(audioItem._id) {
-        isDownloaded = mediaViewModel.isAudioDownloaded(audioItem._id)
-    }
+    // Check if the current audio is in the downloaded list
+    val isDownloaded = downloadedAudioList.any { it.id == audioItem._id }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()

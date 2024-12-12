@@ -11,6 +11,10 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -20,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.levelmind.data.models.AudioModelItem
 import com.example.levelmind.data.models.BottomNavParams
 import com.example.levelmind.screens.Downloads
 import com.example.levelmind.screens.Media
@@ -28,14 +33,17 @@ import com.example.levelmind.viewmodals.MediaViewModel
 @Composable
 fun BottomNav(navController: NavHostController,mediaViewModel : MediaViewModel){
     val navHostController = rememberNavController()
-
+    var selectedAudio by remember { mutableStateOf<AudioModelItem?>(null) }
     Scaffold(bottomBar = { FloatingBottomBar(navHostController) }) { innerPadding ->
         NavHost(navController = navHostController, startDestination = Routes.Media.routes, modifier = Modifier.padding(innerPadding) ){
             composable(Routes.Media.routes){
                 Media(mediaViewModel)
             }
             composable(Routes.Downloads.routes){
-                Downloads()
+                Downloads(mediaViewModel,
+                    onAudioSelected = {autoItem ->
+                        selectedAudio = autoItem
+                    })
             }
         }
     }
