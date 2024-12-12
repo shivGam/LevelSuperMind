@@ -1,5 +1,7 @@
 package com.example.levelmind.screens
 
+import MediaPlayBackOverlay
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,9 +43,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import coil.compose.rememberAsyncImagePainter
 import com.example.levelmind.R
 import com.example.levelmind.data.AudioModelItem
+import com.example.levelmind.utils.DownloadWorker
 import com.example.levelmind.viewmodals.MediaViewModel
 import java.io.File
 
@@ -53,15 +59,15 @@ fun Media(mediaViewModel: MediaViewModel) {
     val context = LocalContext.current
     val downloadDir = context.filesDir
 
-    // Scroll state for banner visibility
     val listState = rememberLazyListState()
 
-    // Lavender color palette
     val lavenderBackground = Color(0xFFF0E6FF)
     val lavenderPrimary = Color(0xFF9E7BFF)
 
-    // Determine banner visibility based on scroll position
     val isBannerVisible = listState.firstVisibleItemIndex == 0
+
+    // State to manage currently selected audio for playback
+    var selectedAudio by remember { mutableStateOf<AudioModelItem?>(null) }
 
     Box(
         modifier = Modifier
@@ -125,28 +131,43 @@ fun Media(mediaViewModel: MediaViewModel) {
                             audioItem = audioItem,
                             mediaViewModel = mediaViewModel,
                             downloadDir = downloadDir,
-                            backgroundColor = lavenderPrimary
+                            context = context,
+                            backgroundColor = lavenderPrimary,
+                            onAudioSelected = { selectedAudio = it }
                         )
                     }
                 }
             }
         }
+
+        // Overlay for selected audio
+        selectedAudio?.let { audio ->
+            MediaPlayBackOverlay(
+                audioItem = audio,
+                mediaViewModel = mediaViewModel,
+                onClose = { selectedAudio = null }
+            )
+        }
     }
 }
+
+
 
 @Composable
 fun AudioItem(
     audioItem: AudioModelItem,
     mediaViewModel: MediaViewModel,
     downloadDir: File,
-    backgroundColor: Color
+    context: Context,
+    backgroundColor: Color,
+    onAudioSelected: (AudioModelItem) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(backgroundColor.copy(alpha = 0.1f))
-            .clickable(onClick = {  })
+            .clickable { onAudioSelected(audioItem) }
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -178,9 +199,19 @@ fun AudioItem(
             )
         }
 
-        // Download Button
         IconButton(
-            onClick = { /* Download logic */ },
+            onClick = {
+                val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
+                    .setInputData(
+                        workDataOf(
+                            "download_url" to audioItem.url,
+                            "song_id" to audioItem._id
+                        )
+                    )
+                    .build()
+
+                WorkManager.getInstance(context).enqueue(downloadRequest)
+            },
             modifier = Modifier
                 .clip(RoundedCornerShape(12.dp))
                 .background(Color.White.copy(alpha = 0.3f))

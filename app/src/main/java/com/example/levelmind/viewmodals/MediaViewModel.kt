@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.net.URL
 
 class MediaViewModel(
     private val repository: MediaRepository
@@ -30,7 +32,6 @@ class MediaViewModel(
                     _audioList.postValue(response.body())
                     Log.d("MediaViewModel", "Songs fetched successfully")
                 } else {
-                    // Handle the case when the response is unsuccessful (e.g., API returned an error)
                     Log.e("MediaViewModel", "Error: ${response.code()} ${response.message()}")
                 }
             }catch (e : Exception){
@@ -38,4 +39,5 @@ class MediaViewModel(
             }
         }
     }
+
 }
