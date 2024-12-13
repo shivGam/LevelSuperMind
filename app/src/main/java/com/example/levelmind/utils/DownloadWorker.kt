@@ -30,7 +30,7 @@ class DownloadWorker(
     }
 
     private val mediaRepository: MediaRepository by lazy {
-        MediaRepository(RetrofitInstance.api) // Assuming you have a RetrofitClient setup
+        MediaRepository(RetrofitInstance.api)
     }
 
     override suspend fun doWork(): Result {
@@ -84,9 +84,7 @@ class DownloadWorker(
                 val uri = resolver.insert(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, contentValues)
 
                 uri?.let { mediaStoreUri ->
-                    // Open output stream
                     resolver.openOutputStream(mediaStoreUri)?.use { outputStream ->
-                        // Open input stream and copy
                         connection.inputStream.use { inputStream ->
                             inputStream.copyTo(outputStream)
                         }

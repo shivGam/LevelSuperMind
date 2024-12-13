@@ -23,7 +23,6 @@ class DownloadRepository(private val downloadDao: DownloadDao) {
         return downloadDao.isAudioDownloaded(audioId) > 0
     }
 
-    // Delete a downloaded song
     suspend fun deleteDownloadedAudio(audioId: String) {
         downloadDao.deleteDownloadedAudio(audioId)
     }

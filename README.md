@@ -6,6 +6,8 @@ This is an Android Audio and Video Player App built using **Jetpack Compose**. T
 
 ---
 
+https://github.com/user-attachments/assets/8f02bad2-72e9-4509-8a7f-5d8cfd15b682
+
 ## Features
 
 - **Play/Pause Button**: Controls the playback of audio.

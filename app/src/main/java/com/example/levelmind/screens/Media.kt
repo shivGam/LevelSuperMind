@@ -78,11 +78,10 @@ fun Media(mediaViewModel: MediaViewModel) {
     var selectedAudio by remember { mutableStateOf<AudioModelItem?>(null) }
     var isInternetAvailable by remember { mutableStateOf(false) }
 
-    // Check internet connection continuously
     LaunchedEffect(Unit) {
         while (true) {
             isInternetAvailable = isNetworkAvailable(context)
-            delay(2000) // Check every 2 seconds
+            delay(2000) // I don't prefer this method, but this is a small assignment
         }
     }
 
@@ -91,20 +90,17 @@ fun Media(mediaViewModel: MediaViewModel) {
             .fillMaxSize()
             .background(lavenderBackground)
     ) {
-        // LazyColumn with full-width banner and no horizontal padding
         LazyColumn(
             state = listState,
             contentPadding = PaddingValues(vertical = 0.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Banner as the first item - now edge to edge
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(250.dp)
                 ) {
-                    // Banner Image - now edge to edge
                     Image(
                         painter = rememberAsyncImagePainter(R.drawable.banner),
                         contentDescription = "Top Banner",
@@ -112,7 +108,6 @@ fun Media(mediaViewModel: MediaViewModel) {
                         contentScale = ContentScale.Crop
                     )
 
-                    // Overlay Gradient
                     Box(
                         modifier = Modifier
                             .matchParentSize()
@@ -127,7 +122,6 @@ fun Media(mediaViewModel: MediaViewModel) {
                             )
                     )
 
-                    // Text Overlay
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -155,7 +149,6 @@ fun Media(mediaViewModel: MediaViewModel) {
                     }
                 }
             }
-            // Apply padding only for audio list items
             if (audioList.isEmpty()) {
                 item {
                     Box(
@@ -184,7 +177,6 @@ fun Media(mediaViewModel: MediaViewModel) {
                     }
                 }
             } else {
-                // Audio items with horizontal padding
                 items(audioList) { audioItem ->
                     Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                         AudioItem(
@@ -216,7 +208,6 @@ fun Media(mediaViewModel: MediaViewModel) {
             }
         }
 
-        // Overlay for selected audio
         if (isNetworkAvailable(context)) {
             selectedAudio?.let { audio ->
                 MediaPlayBackOverlay(
@@ -252,7 +243,6 @@ fun AudioItem(
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Artwork
         Image(
             painter = rememberAsyncImagePainter(audioItem.songBanner),
             contentDescription = audioItem.songName,
@@ -262,7 +252,6 @@ fun AudioItem(
             contentScale = ContentScale.Crop
         )
 
-        // Song Details
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -307,7 +296,6 @@ fun AudioItem(
                     tint = Color.Black
                 )
             } else {
-                // Display download icon if the audio is not downloaded
                 Icon(
                     imageVector = Icons.Default.Download,
                     contentDescription = "Download",

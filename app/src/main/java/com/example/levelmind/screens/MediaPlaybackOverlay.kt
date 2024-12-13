@@ -52,7 +52,6 @@ fun MediaPlayBackOverlay(
     // Coroutine scope for progress tracking
     val coroutineScope = rememberCoroutineScope()
 
-    // Update MediaPlayer when audioItem changes
     DisposableEffect(audioItem) {
         // Initialize MediaPlayer
         val player = MediaPlayer().apply {
@@ -68,7 +67,6 @@ fun MediaPlayBackOverlay(
         }
         mediaPlayer = player
 
-        // Coroutine for continuous progress tracking
         val progressJob = coroutineScope.launch {
             while (isActive) {
                 if (isPlaying) {
@@ -78,20 +76,17 @@ fun MediaPlayBackOverlay(
             }
         }
 
-        // Playback completion listener
         player.setOnCompletionListener {
             isPlaying = false
             currentPosition = totalDuration
         }
 
-        // Cleanup
         onDispose {
             progressJob.cancel()
             player.release()
         }
     }
 
-    // Animated opacity for dismiss
     val opacity by animateFloatAsState(
         targetValue = 1f - dismissProgress,
         label = "Overlay Opacity"
@@ -127,7 +122,6 @@ fun MediaPlayBackOverlay(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Close Button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -180,7 +174,6 @@ fun MediaPlayBackOverlay(
                 )
             )
 
-            // Time Display
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -197,7 +190,6 @@ fun MediaPlayBackOverlay(
                 )
             }
 
-            // Playback Controls
             Spacer(modifier = Modifier.height(16.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -266,7 +258,6 @@ fun MediaPlayBackOverlay(
     }
 }
 
-// Utility function to format time (remains the same as before)
 fun formatTime(seconds: Int): String {
     val minutes = seconds / 60
     val remainingSeconds = seconds % 60

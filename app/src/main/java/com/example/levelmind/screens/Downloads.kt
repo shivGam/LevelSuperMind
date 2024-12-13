@@ -94,14 +94,12 @@ fun Downloads(
                 contentPadding = PaddingValues(vertical = 0.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Banner as the first item - now edge to edge
                 item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(250.dp)
                     ) {
-                        // Banner Image - now edge to edge
                         Image(
                             painter = rememberAsyncImagePainter(R.drawable.banner_down),
                             contentDescription = "Top Banner",
@@ -109,7 +107,6 @@ fun Downloads(
                             contentScale = ContentScale.Crop
                         )
 
-                        // Overlay Gradient
                         Box(
                             modifier = Modifier
                                 .matchParentSize()
@@ -152,7 +149,6 @@ fun Downloads(
                         }
                     }
                 }
-                // Downloaded Audio List with horizontal padding
                 items(downloadedAudioList) { downloadedAudio ->
                     val audioItem = AudioModelItem(
                         _id = downloadedAudio.id,
@@ -181,7 +177,6 @@ fun Downloads(
             }
         }
 
-        // Overlay for selected audio
         selectedAudio?.let { audio ->
             MediaPlayBackOverlay(
                 audioItem = audio,
@@ -220,7 +215,6 @@ fun DownloadedAudioItem(
             contentScale = ContentScale.Crop
         )
 
-        // Song Details
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -238,7 +232,6 @@ fun DownloadedAudioItem(
             )
         }
 
-        // Delete Button
         IconButton(
             onClick = {
                 val file = File(downloadedAudio.localFilePath)
@@ -246,7 +239,6 @@ fun DownloadedAudioItem(
                     file.delete()
                 }
 
-                // Coroutine to delete from database
                 CoroutineScope(Dispatchers.IO).launch {
                     mediaViewModel.deleteDownloadedAudio(downloadedAudio.id)
                 }

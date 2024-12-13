@@ -68,8 +68,8 @@ fun FloatingBottomBar(navHostController: NavHostController) {
         )
     )
     BottomAppBar(
-        containerColor = lavenderPrimary.copy(alpha = 0.2f), // Dark background using lavender primary
-        contentColor = Color.White, // Light content for contrast
+        containerColor = lavenderPrimary.copy(alpha = 0.2f),
+        contentColor = Color.White,
     ) {
         navItems.forEach {
             val selected = it.route == backStackEntry.value?.destination?.route
@@ -94,11 +94,10 @@ fun FloatingBottomBar(navHostController: NavHostController) {
                 label = {
                     if (selected) Text(
                         text = it.title,
-                        color = Color.White // White text for selected state
+                        color = Color.White
                     )
                 },
                 alwaysShowLabel = true,
-                // Customize the selected and unselected colors
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Color.White,
                     selectedTextColor = Color.White,
