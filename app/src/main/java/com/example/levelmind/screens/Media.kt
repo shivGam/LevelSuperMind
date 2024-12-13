@@ -2,6 +2,9 @@ package com.example.levelmind.screens
 
 import MediaPlayBackOverlay
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -44,7 +47,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
@@ -53,6 +59,7 @@ import com.example.levelmind.R
 import com.example.levelmind.data.models.AudioModelItem
 import com.example.levelmind.utils.DownloadWorker
 import com.example.levelmind.viewmodals.MediaViewModel
+import kotlinx.coroutines.delay
 import java.io.File
 
 @Composable
@@ -65,31 +72,43 @@ fun Media(mediaViewModel: MediaViewModel) {
 
     val lavenderBackground = Color(0xFFF0E6FF)
     val lavenderPrimary = Color(0xFF9E7BFF)
-
-    val isBannerVisible = listState.firstVisibleItemIndex == 0
+    val lavenderText = Color(0xFF5E35B1)
 
     // State to manage currently selected audio for playback
     var selectedAudio by remember { mutableStateOf<AudioModelItem?>(null) }
+    var isInternetAvailable by remember { mutableStateOf(false) }
+
+    // Check internet connection continuously
+    LaunchedEffect(Unit) {
+        while (true) {
+            isInternetAvailable = isNetworkAvailable(context)
+            delay(2000) // Check every 2 seconds
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(lavenderBackground)
     ) {
-        Column {
-            // Top Banner with Animated Visibility
-            AnimatedVisibility(
-                visible = isBannerVisible,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
+        // LazyColumn with contentPadding only for non-banner items
+        LazyColumn(
+            state = listState,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Banner as the first item
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                ) {
+                    // Banner Image
                     Image(
                         painter = rememberAsyncImagePainter(R.drawable.banner),
                         contentDescription = "Top Banner",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp),
+                        modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
 
@@ -107,52 +126,103 @@ fun Media(mediaViewModel: MediaViewModel) {
                                 )
                             )
                     )
+
+                    // Text Overlay
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        Column {
+                            Text(
+                                text = "Enjoy Music",
+                                style = TextStyle(
+                                    fontSize = 32.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = lavenderText
+                                ),
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "Discover Your Favorite Sounds",
+                                style = TextStyle(
+                                    fontSize = 16.sp,
+                                    color = lavenderText.copy(alpha = 0.7f)
+                                )
+                            )
+                        }
+                    }
                 }
             }
 
-            // Show loading indicator if list is empty
+            // Apply padding only for audio list items
             if (audioList.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        color = lavenderPrimary,
-                        modifier = Modifier.size(50.dp)
-                    )
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(top = 100.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if(isInternetAvailable){
+                            CircularProgressIndicator(
+                                color = lavenderPrimary,
+                                modifier = Modifier.size(50.dp)
+                            )
+                        }else{
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "No Internet Connection",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+
+                    }
                 }
             } else {
-                // Audio List
-                LazyColumn(
-                    state = listState,
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(audioList) { audioItem ->
-                        AudioItem(
-                            audioItem = audioItem,
-                            mediaViewModel = mediaViewModel,
-                            downloadDir = downloadDir,
-                            context = context,
-                            backgroundColor = lavenderPrimary,
-                            onAudioSelected = { selectedAudio = it }
-                        )
-                    }
+                items(audioList) { audioItem ->
+                    AudioItem(
+                        audioItem = audioItem,
+                        mediaViewModel = mediaViewModel,
+                        downloadDir = downloadDir,
+                        context = context,
+                        backgroundColor = lavenderPrimary, // Apply padding here
+                        onAudioSelected = {
+                            // Only set selected audio if internet is available
+                            if (isNetworkAvailable(context)) {
+                                selectedAudio = it
+                            } else {
+                                // Optionally show a toast or snackbar about no internet connection
+                                Toast.makeText(
+                                    context,
+                                    "No internet connection",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    )
                 }
             }
         }
 
         // Overlay for selected audio
-        selectedAudio?.let { audio ->
-            MediaPlayBackOverlay(
-                audioItem = audio,
-                mediaViewModel = mediaViewModel,
-                onClose = { selectedAudio = null }
-            )
+        if (isNetworkAvailable(context)) {
+            selectedAudio?.let { audio ->
+                MediaPlayBackOverlay(
+                    audioItem = audio,
+                    mediaViewModel = mediaViewModel,
+                    onClose = { selectedAudio = null }
+                )
+            }
         }
     }
 }
-
 
 
 @Composable
@@ -241,5 +311,24 @@ fun AudioItem(
                 )
             }
         }
+    }
+}
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE)
+            as? ConnectivityManager ?: return false
+
+    return try {
+        val activeNetwork = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+
+        when {
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            else -> false
+        }
+    } catch (e: Exception) {
+        // Log the exception if needed
+        false
     }
 }

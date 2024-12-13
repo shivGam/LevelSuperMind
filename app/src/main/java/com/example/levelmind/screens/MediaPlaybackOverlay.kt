@@ -25,6 +25,9 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import com.example.levelmind.data.models.AudioModelItem
 import com.example.levelmind.viewmodals.MediaViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 @Composable
 fun MediaPlayBackOverlay(
@@ -46,6 +49,9 @@ fun MediaPlayBackOverlay(
     var dismissProgress by remember { mutableStateOf(0f) }
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
+    // Coroutine scope for progress tracking
+    val coroutineScope = rememberCoroutineScope()
+
     // Update MediaPlayer when audioItem changes
     DisposableEffect(audioItem) {
         // Initialize MediaPlayer
@@ -60,14 +66,13 @@ fun MediaPlayBackOverlay(
         }
         mediaPlayer = player
 
-        // Set up progress tracking
-        val handler = Handler(Looper.getMainLooper())
-        val updateProgress = object : Runnable {
-            override fun run() {
+        // Coroutine for continuous progress tracking
+        val progressJob = coroutineScope.launch {
+            while (isActive) {
                 if (isPlaying) {
                     currentPosition = player.currentPosition.toFloat()
-                    handler.postDelayed(this, 100)
                 }
+                delay(100) // Update every 100ms
             }
         }
 
@@ -79,7 +84,7 @@ fun MediaPlayBackOverlay(
 
         // Cleanup
         onDispose {
-            handler.removeCallbacks(updateProgress)
+            progressJob.cancel()
             player.release()
         }
     }
