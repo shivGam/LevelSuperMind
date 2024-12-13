@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -61,7 +62,6 @@ import com.example.levelmind.utils.DownloadWorker
 import com.example.levelmind.viewmodals.MediaViewModel
 import kotlinx.coroutines.delay
 import java.io.File
-
 @Composable
 fun Media(mediaViewModel: MediaViewModel) {
     val audioList by mediaViewModel.audioList.observeAsState(emptyList())
@@ -91,20 +91,20 @@ fun Media(mediaViewModel: MediaViewModel) {
             .fillMaxSize()
             .background(lavenderBackground)
     ) {
-        // LazyColumn with contentPadding only for non-banner items
+        // LazyColumn with full-width banner and no horizontal padding
         LazyColumn(
             state = listState,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(vertical = 0.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Banner as the first item
+            // Banner as the first item - now edge to edge
             item {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(250.dp)
                 ) {
-                    // Banner Image
+                    // Banner Image - now edge to edge
                     Image(
                         painter = rememberAsyncImagePainter(R.drawable.banner),
                         contentDescription = "Top Banner",
@@ -155,14 +155,13 @@ fun Media(mediaViewModel: MediaViewModel) {
                     }
                 }
             }
-
             // Apply padding only for audio list items
             if (audioList.isEmpty()) {
                 item {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(top = 100.dp),
+                            .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         if(isInternetAvailable){
@@ -182,31 +181,37 @@ fun Media(mediaViewModel: MediaViewModel) {
                                 )
                             }
                         }
-
                     }
                 }
             } else {
+                // Audio items with horizontal padding
                 items(audioList) { audioItem ->
-                    AudioItem(
-                        audioItem = audioItem,
-                        mediaViewModel = mediaViewModel,
-                        downloadDir = downloadDir,
-                        context = context,
-                        backgroundColor = lavenderPrimary, // Apply padding here
-                        onAudioSelected = {
-                            // Only set selected audio if internet is available
-                            if (isNetworkAvailable(context)) {
-                                selectedAudio = it
-                            } else {
-                                // Optionally show a toast or snackbar about no internet connection
-                                Toast.makeText(
-                                    context,
-                                    "No internet connection",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        AudioItem(
+                            audioItem = audioItem,
+                            mediaViewModel = mediaViewModel,
+                            downloadDir = downloadDir,
+                            context = context,
+                            backgroundColor = lavenderPrimary,
+                            onAudioSelected = {
+                                // Only set selected audio if internet is available
+                                if (isNetworkAvailable(context)) {
+                                    selectedAudio = it
+                                } else {
+                                    // Optionally show a toast or snackbar about no internet connection
+                                    Toast.makeText(
+                                        context,
+                                        "No internet connection",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
             }
         }
@@ -223,7 +228,6 @@ fun Media(mediaViewModel: MediaViewModel) {
         }
     }
 }
-
 
 @Composable
 fun AudioItem(

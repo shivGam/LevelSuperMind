@@ -20,7 +20,6 @@ import com.example.levelmind.viewmodals.MediaViewModel
 import com.example.levelmind.viewmodals.MediaViewModelFactory
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

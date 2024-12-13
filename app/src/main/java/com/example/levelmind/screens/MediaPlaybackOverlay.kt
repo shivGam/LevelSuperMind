@@ -60,6 +60,8 @@ fun MediaPlayBackOverlay(
                 setDataSource(context, Uri.parse(audioItem.url))
                 prepare()
                 totalDuration = duration.toFloat()
+                start()
+                isPlaying = true
             } catch (e: Exception) {
                 Log.e("MediaPlayBackOverlay", "Error setting audio source: ${e.message}")
             }

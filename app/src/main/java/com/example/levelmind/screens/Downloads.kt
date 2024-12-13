@@ -91,17 +91,17 @@ fun Downloads(
             }
         } else {
             LazyColumn(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                contentPadding = PaddingValues(vertical = 0.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Banner as the first item
+                // Banner as the first item - now edge to edge
                 item {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(250.dp)
                     ) {
-                        // Banner Image
+                        // Banner Image - now edge to edge
                         Image(
                             painter = rememberAsyncImagePainter(R.drawable.banner_down),
                             contentDescription = "Top Banner",
@@ -152,8 +152,7 @@ fun Downloads(
                         }
                     }
                 }
-
-                // Downloaded Audio List
+                // Downloaded Audio List with horizontal padding
                 items(downloadedAudioList) { downloadedAudio ->
                     val audioItem = AudioModelItem(
                         _id = downloadedAudio.id,
@@ -163,15 +162,21 @@ fun Downloads(
                         url = downloadedAudio.localFilePath
                     )
 
-                    DownloadedAudioItem(
-                        downloadedAudio = downloadedAudio,
-                        mediaViewModel = mediaViewModel,
-                        context = context,
-                        backgroundColor = lavenderPrimary,
-                        onAudioSelected = {
-                            selectedAudio = audioItem
-                        }
-                    )
+                    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        DownloadedAudioItem(
+                            downloadedAudio = downloadedAudio,
+                            mediaViewModel = mediaViewModel,
+                            context = context,
+                            backgroundColor = lavenderPrimary,
+                            onAudioSelected = {
+                                selectedAudio = audioItem
+                            }
+                        )
+                    }
+                }
+
+                item {
+                    Spacer(modifier = Modifier.height(6.dp))
                 }
             }
         }
